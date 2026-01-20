@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astronaut Fitness Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Animated space background */
+        .space-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a2e 0%, #16213e 50%, #0f3460 100%);
+            z-index: -2;
+        }
+
+        .stars {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Main container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+            margin-bottom: 10px;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(255, 0, 255, 0.8)); }
+        }
+
+        .astronaut-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .astronaut-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #00ffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Dashboard grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        /* Card styles */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+
+        .card:hover::before {
+            animation: shine 0.5s ease-in-out;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.3);
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Form controls */
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1em;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Dropdown options styling */
+        select option {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 10px;
+        }
+
+        select option:hover,
+        select option:checked {
+            background: #667eea;
+            color: #fff;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Stats display */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        /* Progress bars */
+        .progress-container {
+            margin: 15px 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Activity log */
+        .activity-log {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .activity-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid #00ffff;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        /* Health status indicator */
+        .health-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        .status-good { background: #00ff00; }
+        .status-warning { background: #ffff00; }
+        .status-critical { background: #ff0000; }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0.5;
+            animation: floatUp 10s linear infinite;
+        }
+
+        @keyframes floatUp {
+            from {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            to {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="space-bg"></div>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Astronaut Fitness Tracker</h1>
+            <div class="astronaut-info">
+                <div class="astronaut-avatar">👨‍🚀</div>
+                <div>
+                    <h2 id="astronautName">Commander Bhavu</h2>
+                    <p>Mission Day: <span id="missionDay">1</span> | Station: ISS Alpha</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <!-- Exercise Tracker -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="card-icon">💪</span>
+                    Exercise Tracker
+                </div>
+                <select id="exerciseType">
+                    <option value="">Select Exercise</option>
+                    <option value="treadmill">Treadmill (COLBERT)</option>
+                    <option value="bike">Stationary Bike</option>
+                    <option value="resistance">Resistance Training</option>
+                    <option value="yoga">Space Yoga</option>
+                </select>
+                <input type="number" id="exerciseDuration" placeholder="Duration (minutes)" min="1" max="180">
+                <input type="number" id="exerciseIntensity" placeholder="Intensity (1-10)" min="1" max="10">
+                <button onclick="logExercise()">Log Exercise</button>
+                
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Daily Exercise Goal</span>
+                        <span id="exercisePercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="exerciseProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meal Tracker -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="card-icon">🍽️</span>
+                    Nutrition Log
+                </div>
+                <select id="mealType">
+                    <option value="">Select Meal</option>
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="snack">Snack</option>
+                </select>
+                <input type="text" id="mealName" placeholder="Meal description">
+                <input type="number" id="calories" placeholder="Calories" min="0">
+                <input type="number" id="water" placeholder="Water intake (ml)" min="0">
+                <button onclick="logMeal()">Log Meal</button>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalCalories">0</div>
+                        <div class="stat-label">Calories Today</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalWater">0</div>
+                        <div class="stat-label">Water (ml)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Metrics -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="card-icon">❤️</span>
+                    Vital Signs
+                </div>
+                <input type="number" id="heartRate" placeholder="Heart Rate (bpm)" min="40" max="200">
+                <input type="number" id="bloodPressure" placeholder="Blood Pressure (systolic)" min="80" max="200">
+                <input type="number" id="oxygenLevel" placeholder="Oxygen Level (%)" min="80" max="100">
+                <input type="number" id="sleepHours" placeholder="Sleep Hours" min="0" max="24" step="0.5">
+                <button onclick="logVitals()">Update Vitals</button>
+                
+                <div class="health-status">
+                    <div class="status-indicator status-good" id="healthIndicator"></div>
+                    <span id="healthMessage">All systems nominal</span>
+                </div>
+            </div>
+
+            <!-- Movement Tracker -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="card-icon">🚶</span>
+                    Movement Tracker
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="steps">0</div>
+                        <div class="stat-label">Steps Today</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="activeMinutes">0</div>
+                        <div class="stat-label">Active Minutes</div>
+                    </div>
+                </div>
+                <button onclick="simulateMovement()">Simulate Movement</button>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Daily Movement Goal</span>
+                        <span id="movementPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="movementProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-title">
+                    <span class="card-icon">📊</span>
+                    Mission Activity Log
+                </div>
+                <div class="activity-log" id="activityLog">
+                    <div class="activity-item">Welcome to ISS Alpha! Your fitness journey begins now.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let fitnessData = {
+            exercises: [],
+            meals: [],
+            vitals: {},
+            totalCalories: 0,
+            totalWater: 0,
+            exerciseMinutes: 0,
+            steps: 0,
+            activeMinutes: 0,
+            missionDay: 1,
+            missionStartDate: null
+        };
+
+        // Initialize stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Create floating particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.innerHTML = ['🌟', '✨', '💫', '⭐'][Math.floor(Math.random() * 4)];
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.fontSize = Math.random() * 20 + 10 + 'px';
+            particle.style.animationDuration = Math.random() * 5 + 10 + 's';
+            document.body.appendChild(particle);
+            
+            setTimeout(() => particle.remove(), 15000);
+        }
+
+        // Log exercise
+        function logExercise() {
+            const type = document.getElementById('exerciseType').value;
+            const duration = parseInt(document.getElementById('exerciseDuration').value);
+            const intensity = parseInt(document.getElementById('exerciseIntensity').value);
+            
+            if (!type || !duration || !intensity) {
+                alert('Please fill in all exercise fields!');
+                return;
+            }
+            
+            fitnessData.exerciseMinutes += duration;
+            fitnessData.exercises.push({ type, duration, intensity, time: new Date() });
+            
+            updateExerciseProgress();
+            addToActivityLog(`🏃 Completed ${duration} minutes of ${type} at intensity ${intensity}/10`);
+            saveFitnessData(); // Save after logging exercise
+            
+            // Clear inputs
+            document.getElementById('exerciseType').value = '';
+            document.getElementById('exerciseDuration').value = '';
+            document.getElementById('exerciseIntensity').value = '';
+            
+            // Celebrate achievement
+            if (fitnessData.exerciseMinutes >= 150) {
+                celebrate();
+            }
+        }
+
+        // Log meal
+        function logMeal() {
+            const type = document.getElementById('mealType').value;
+            const name = document.getElementById('mealName').value;
+            const calories = parseInt(document.getElementById('calories').value) || 0;
+            const water = parseInt(document.getElementById('water').value) || 0;
+            
+            if (!type || !name) {
+                alert('Please fill in meal type and description!');
+                return;
+            }
+            
+            fitnessData.totalCalories += calories;
+            fitnessData.totalWater += water;
+            fitnessData.meals.push({ type, name, calories, water, time: new Date() });
+            
+            document.getElementById('totalCalories').textContent = fitnessData.totalCalories;
+            document.getElementById('totalWater').textContent = fitnessData.totalWater;
+            
+            addToActivityLog(`🍽️ Logged ${type}: ${name} (${calories} cal, ${water}ml water)`);
+            saveFitnessData(); // Save after logging meal
+            
+            // Clear inputs
+            document.getElementById('mealType').value = '';
+            document.getElementById('mealName').value = '';
+            document.getElementById('calories').value = '';
+            document.getElementById('water').value = '';
+        }
+
+        // Log vitals
+        function logVitals() {
+            const heartRate = parseInt(document.getElementById('heartRate').value);
+            const bloodPressure = parseInt(document.getElementById('bloodPressure').value);
+            const oxygenLevel = parseInt(document.getElementById('oxygenLevel').value);
+            const sleepHours = parseFloat(document.getElementById('sleepHours').value);
+            
+            if (!heartRate || !bloodPressure || !oxygenLevel || !sleepHours) {
+                alert('Please fill in all vital signs!');
+                return;
+            }
+            
+            fitnessData.vitals = { heartRate, bloodPressure, oxygenLevel, sleepHours };
+            
+            updateHealthStatus();
+            addToActivityLog(`❤️ Vitals updated: HR ${heartRate}, BP ${bloodPressure}, O2 ${oxygenLevel}%, Sleep ${sleepHours}h`);
+            saveFitnessData(); // Save after logging vitals
+            
+            // Clear inputs
+            document.getElementById('heartRate').value = '';
+            document.getElementById('bloodPressure').value = '';
+            document.getElementById('oxygenLevel').value = '';
+            document.getElementById('sleepHours').value = '';
+        }
+
+        // Simulate movement
+        function simulateMovement() {
+            const newSteps = Math.floor(Math.random() * 500) + 100;
+            const newActive = Math.floor(Math.random() * 30) + 5;
+            
+            fitnessData.steps += newSteps;
+            fitnessData.activeMinutes += newActive;
+            
+            document.getElementById('steps').textContent = fitnessData.steps;
+            document.getElementById('activeMinutes').textContent = fitnessData.activeMinutes;
+            
+            updateMovementProgress();
+            addToActivityLog(`🚶 Movement detected: +${newSteps} steps, +${newActive} active minutes`);
+            saveFitnessData(); // Save after movement simulation
+        }
+
+        // Update progress bars
+        function updateExerciseProgress() {
+            const goal = 150; // Weekly goal in minutes
+            const percent = Math.min(100, Math.round((fitnessData.exerciseMinutes / goal) * 100));
+            document.getElementById('exerciseProgress').style.width = percent + '%';
+            document.getElementById('exercisePercent').textContent = percent + '%';
+        }
+
+        function updateMovementProgress() {
+            const stepGoal = 5000;
+            const percent = Math.min(100, Math.round((fitnessData.steps / stepGoal) * 100));
+            document.getElementById('movementProgress').style.width = percent + '%';
+            document.getElementById('movementPercent').textContent = percent + '%';
+        }
+
+        // Update health status
+        function updateHealthStatus() {
+            const { heartRate, bloodPressure, oxygenLevel, sleepHours } = fitnessData.vitals;
+            const indicator = document.getElementById('healthIndicator');
+            const message = document.getElementById('healthMessage');
+            
+            if (oxygenLevel >= 95 && heartRate >= 60 && heartRate <= 100 && sleepHours >= 7) {
+                indicator.className = 'status-indicator status-good';
+                message.textContent = 'All systems nominal - Excellent health!';
+            } else if (oxygenLevel >= 90 || (heartRate >= 50 && heartRate <= 110)) {
+                indicator.className = 'status-indicator status-warning';
+                message.textContent = 'Minor deviations detected - Monitor closely';
+            } else {
+                indicator.className = 'status-indicator status-critical';
+                message.textContent = 'Alert: Health parameters need attention';
+            }
+        }
+
+        // Add to activity log
+        function addToActivityLog(message) {
+            const log = document.getElementById('activityLog');
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            const time = new Date().toLocaleTimeString();
+            item.innerHTML = `<strong>${time}</strong> - ${message}`;
+            log.insertBefore(item, log.firstChild);
+            
+            // Keep only last 10 items
+            while (log.children.length > 10) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        // Celebration animation
+        function celebrate() {
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => createParticle(), i * 100);
+            }
+            addToActivityLog('🎉 Achievement unlocked! Daily exercise goal reached!');
+        }
+
+        // Mission day counter - now based on actual days
+        function updateMissionDay() {
+            const today = new Date();
+            const startDate = new Date(fitnessData.missionStartDate);
+            const timeDiff = today.getTime() - startDate.getTime();
+            const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+            
+            fitnessData.missionDay = daysDiff + 1; // Mission starts on day 1
+            document.getElementById('missionDay').textContent = fitnessData.missionDay;
+        }
+
+        // Initialize mission tracking
+        function initializeMission() {
+            // Check if mission has already started (data exists in localStorage)
+            const savedData = localStorage.getItem('astronautFitnessData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                fitnessData = { ...fitnessData, ...data };
+            } else {
+                // New mission - set start date to today
+                fitnessData.missionStartDate = new Date().toISOString();
+                saveFitnessData();
+            }
+            updateMissionDay();
+        }
+
+        // Save fitness data to localStorage
+        function saveFitnessData() {
+            localStorage.setItem('astronautFitnessData', JSON.stringify(fitnessData));
+        }
+
+        // Check for new day and update mission day accordingly
+        function checkNewDay() {
+            const currentDay = fitnessData.missionDay;
+            updateMissionDay();
+            
+            if (fitnessData.missionDay > currentDay) {
+                addToActivityLog(`📅 Mission Day ${fitnessData.missionDay} begins - New day detected!`);
+                // Reset daily counters if needed
+                // fitnessData.exerciseMinutes = 0; // Uncomment if you want to reset daily progress
+                saveFitnessData();
+            }
+        }
+
+        // Initialize
+        createStars();
+        initializeMission(); // Initialize mission tracking
+        setInterval(createParticle, 5000);
+        setInterval(checkNewDay, 60000); // Check for new day every minute
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'e' && e.ctrlKey) {
+                document.getElementById('exerciseType').focus();
+            } else if (e.key === 'm' && e.ctrlKey) {
+                document.getElementById('mealType').focus();
+            }
+        });
+    </script>
+</body>
+</html>
